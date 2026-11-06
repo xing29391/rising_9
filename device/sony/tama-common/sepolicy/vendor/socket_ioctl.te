@@ -1,0 +1,12 @@
+# sdm845 vendor daemons use qmi/qpcr sockets before the first read.
+allow vendor_cnd self:socket ioctl;
+allow vendor_ims self:socket ioctl;
+allow vendor_time_daemon self:socket read;
+allow vendor_qti self:socket read;
+allow vendor_location self:socket read;
+allow vendor_hal_gnss_qti self:socket read;
+
+# qmi_cci opens the control socket with the daemon's own label; without
+# create the GNSS client never initialises (qmi_client_notifier_init -16).
+allow vendor_location self:socket { create ioctl write getattr setopt getopt connect };
+allow vendor_hal_gnss_qti self:socket { create ioctl write getattr setopt getopt connect };

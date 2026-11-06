@@ -1,0 +1,50 @@
+# Audio
+type audio_hweffect_device, file_type;
+
+# Camera
+type hal_camera_somc_socket, file_type;
+type sony_camera_device, file_type;
+type sysfs_camera, fs_type, sysfs_type;
+
+# Data
+type bluetooth_vendor_data_file, file_type, data_file_type;
+
+# Fingerprint sensor
+type fpc_vendor_data_file, file_type, data_file_type;
+type hal_fpc_fingerprint_socket, file_type;
+type sysfs_fingerprint, fs_type, sysfs_type;
+
+# Glove mode
+type sysfs_touch_glove_mode, fs_type, sysfs_type;
+
+# idd
+type idd_data_file, file_type;
+type idd_input_file, file_type;
+type idd_lostfound_file, file_type;
+type idd_output_file, file_type;
+type idd_private_file, file_type;
+type idd_rca_dir, file_type;
+type idd_rca_file, file_type;
+type idd_root_dir, file_type;
+type idd_socket, file_type;
+type startupprober_file, file_type;
+type simpin_cache_data_file, file_type;
+
+# kobjeventd
+type sysfs_switch_lid, fs_type, sysfs_type;
+
+# LTALabel
+type lta_label, fs_type;
+
+# Persist
+type persist_credmgr_file, file_type;
+
+# Power
+type debugfs_sched_features, debugfs_type, fs_type;
+type debugfs_wlan, debugfs_type, fs_type;
+
+# QNS
+type qns_data_file, file_type;
+
+# Socket
+type tad_socket, file_type;

@@ -1,0 +1,18 @@
+# sdm845 vendor blobs use legacy ION (/dev/ion) instead of dmabuf heaps.
+# /dev/ion is labeled ion_device in file_contexts; grant ioctl on top of the
+# r_file_perms that legacy qcom policy already grants.
+
+allow hal_graphics_allocator_default ion_device:chr_file { rw_file_perms ioctl };
+allow hal_graphics_composer_default ion_device:chr_file { rw_file_perms ioctl };
+allow hal_camera_default ion_device:chr_file { rw_file_perms ioctl };
+allow cameraserver ion_device:chr_file { rw_file_perms ioctl };
+allow surfaceflinger ion_device:chr_file { rw_file_perms ioctl };
+allow system_server ion_device:chr_file { rw_file_perms ioctl };
+allow { appdomain -isolated_app } ion_device:chr_file { r_file_perms ioctl };
+
+allow { vendor_adsprpcd vendor_audioadsprpcd vendor_cdsprpcd vendor_chre vendor_dspservice vendor_feature_enabler_client vendor_hal_identity_qti vendor_hal_imsrtp vendor_hal_neuralnetworks_default vendor_hal_trustedui_qti vendor_hbtp vendor_ims vendor_ims_service vendor_lowirpcd_service vendor_sensors vendor_thermal-engine vendor_tlocd } ion_device:chr_file ioctl;
+
+allow vendor_hal_drm_widevine ion_device:chr_file r_file_perms;
+
+# Gatekeeper/keymaster open /dev/ion before QSEECom; without it they SIGABRT.
+allow { vendor_hal_gatekeeper_qti vendor_hal_keymaster_qti tee } ion_device:chr_file { r_file_perms ioctl };

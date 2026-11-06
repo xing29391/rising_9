@@ -1,0 +1,14 @@
+# sdm845 vendor graphics blobs use legacy ION (/dev/ion) directly from the
+# app/system_server/surfaceflinger processes (in-process gralloc mapper).
+# Platform policy no longer grants ion_device access outside compat prebuilts.
+
+allow { appdomain -isolated_app } ion_device:chr_file r_file_perms;
+
+# MediaCodec software codec (mediaswcodec) allocates legacy ION buffers.
+allow mediaswcodec ion_device:chr_file r_file_perms;
+
+# Bootanimation creates its EGL surface through the in-process legacy gralloc
+# mapper. Denying /dev/ion leaves the surface without buffers, eglSwapBuffers
+# fails with EGL_BAD_SURFACE and the panel shows a white screen instead of the
+# animation.
+allow bootanim ion_device:chr_file rw_file_perms;

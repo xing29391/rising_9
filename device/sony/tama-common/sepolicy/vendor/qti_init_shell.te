@@ -1,0 +1,2 @@
+allow vendor_qti_init_shell proc_sched:file w_file_perms;
+allow vendor_qti_init_shell sysfs:file { setattr write };

@@ -1,0 +1,150 @@
+diff --git a/fs/proc/task_mmu.c b/fs/proc/task_mmu.c
+index 1d06ab4aaeab..7c1aae377b7e 100644
+--- a/fs/proc/task_mmu.c
++++ b/fs/proc/task_mmu.c
+@@ -726,6 +726,7 @@ static void show_smap_vma_flags(struct seq_file *m, struct vm_area_struct *vma)
+ 		[ilog2(VM_NORESERVE)]	= "nr",
+ 		[ilog2(VM_HUGETLB)]	= "ht",
+ 		[ilog2(VM_ARCH_1)]	= "ar",
++		[ilog2(VM_WIPEONFORK)]	= "wf",
+ 		[ilog2(VM_DONTDUMP)]	= "dd",
+ #ifdef CONFIG_MEM_SOFT_DIRTY
+ 		[ilog2(VM_SOFTDIRTY)]	= "sd",
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index e3d72b77dd46..4499fc9f69fe 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -187,7 +187,7 @@ extern unsigned int kobjsize(const void *objp);
+ #define VM_NORESERVE	0x00200000	/* should the VM suppress accounting */
+ #define VM_HUGETLB	0x00400000	/* Huge TLB Page VM */
+ #define VM_ARCH_1	0x01000000	/* Architecture-specific flag */
+-#define VM_ARCH_2	0x02000000
++#define VM_WIPEONFORK	0x02000000	/* Wipe VMA contents in child. */
+ #define VM_DONTDUMP	0x04000000	/* Do not include in the core dump */
+ 
+ #ifdef CONFIG_MEM_SOFT_DIRTY
+diff --git a/include/trace/events/mmflags.h b/include/trace/events/mmflags.h
+index 61d41f2543ac..62d0d9b7521a 100644
+--- a/include/trace/events/mmflags.h
++++ b/include/trace/events/mmflags.h
+@@ -125,12 +125,6 @@ IF_HAVE_PG_IDLE(PG_idle,		"idle"		)
+ #define __VM_ARCH_SPECIFIC_1 {VM_ARCH_1,	"arch_1"	}
+ #endif
+ 
+-#if defined(CONFIG_X86)
+-#define __VM_ARCH_SPECIFIC_2 {VM_MPX,		"mpx"		}
+-#else
+-#define __VM_ARCH_SPECIFIC_2 {VM_ARCH_2,	"arch_2"	}
+-#endif
+-
+ #ifdef CONFIG_MEM_SOFT_DIRTY
+ #define IF_HAVE_VM_SOFTDIRTY(flag,name) {flag, name },
+ #else
+@@ -162,7 +156,7 @@ IF_HAVE_PG_IDLE(PG_idle,		"idle"		)
+ 	{VM_NORESERVE,			"noreserve"	},		\
+ 	{VM_HUGETLB,			"hugetlb"	},		\
+ 	__VM_ARCH_SPECIFIC_1				,		\
+-	__VM_ARCH_SPECIFIC_2				,		\
++	{VM_WIPEONFORK,			"wipeonfork"	},		\
+ 	{VM_DONTDUMP,			"dontdump"	},		\
+ IF_HAVE_VM_SOFTDIRTY(VM_SOFTDIRTY,	"softdirty"	)		\
+ 	{VM_MIXEDMAP,			"mixedmap"	},		\
+diff --git a/include/uapi/asm-generic/mman-common.h b/include/uapi/asm-generic/mman-common.h
+index 8c27db0c5c08..49e2b1d78093 100644
+--- a/include/uapi/asm-generic/mman-common.h
++++ b/include/uapi/asm-generic/mman-common.h
+@@ -58,6 +58,9 @@
+ 					   overrides the coredump filter bits */
+ #define MADV_DODUMP	17		/* Clear the MADV_DONTDUMP flag */
+ 
++#define MADV_WIPEONFORK 18		/* Zero memory on fork, child only */
++#define MADV_KEEPONFORK 19		/* Undo MADV_WIPEONFORK */
++
+ /* compatibility flags */
+ #define MAP_FILE	0
+ 
+diff --git a/kernel/fork.c b/kernel/fork.c
+index 8d152ad7dc57..c5b2b7575177 100644
+--- a/kernel/fork.c
++++ b/kernel/fork.c
+@@ -627,7 +627,14 @@ static __latent_entropy int dup_mmap(struct mm_struct *mm,
+ 		if (retval)
+ 			goto fail_nomem_policy;
+ 		tmp->vm_mm = mm;
+-		if (anon_vma_fork(tmp, mpnt))
++		if (tmp->vm_flags & VM_WIPEONFORK) {
++			/*
++			 * VM_WIPEONFORK gets a clean slate in the child.
++			 * Don't prepare anon_vma until fault since we don't
++			 * copy page for current vma.
++			 */
++			tmp->anon_vma = NULL;
++		} else if (anon_vma_fork(tmp, mpnt))
+ 			goto fail_nomem_anon_vma_fork;
+ 		tmp->vm_flags &=
+ 			~(VM_LOCKED|VM_LOCKONFAULT|VM_UFFD_MISSING|VM_UFFD_WP);
+@@ -673,7 +680,8 @@ static __latent_entropy int dup_mmap(struct mm_struct *mm,
+ 		rb_parent = &tmp->vm_rb;
+ 
+ 		mm->map_count++;
+-		retval = copy_page_range(mm, oldmm, mpnt);
++		if (!(tmp->vm_flags & VM_WIPEONFORK))
++			retval = copy_page_range(mm, oldmm, mpnt);
+ 
+ 		if (tmp->vm_ops && tmp->vm_ops->open)
+ 			tmp->vm_ops->open(tmp);
+diff --git a/mm/madvise.c b/mm/madvise.c
+index b753f0265384..c578113904d7 100644
+--- a/mm/madvise.c
++++ b/mm/madvise.c
+@@ -79,6 +79,17 @@ static long madvise_behavior(struct vm_area_struct *vma,
+ 		}
+ 		new_flags &= ~VM_DONTCOPY;
+ 		break;
++	case MADV_WIPEONFORK:
++		/* MADV_WIPEONFORK is only supported on anonymous memory. */
++		if (vma->vm_file || vma->vm_flags & VM_SHARED) {
++			error = -EINVAL;
++			goto out;
++		}
++		new_flags |= VM_WIPEONFORK;
++		break;
++	case MADV_KEEPONFORK:
++		new_flags &= ~VM_WIPEONFORK;
++		break;
+ 	case MADV_DONTDUMP:
+ 		new_flags |= VM_DONTDUMP;
+ 		break;
+@@ -623,6 +634,8 @@ madvise_behavior_valid(int behavior)
+ #endif
+ 	case MADV_DONTDUMP:
+ 	case MADV_DODUMP:
++	case MADV_WIPEONFORK:
++	case MADV_KEEPONFORK:
+ 		return true;
+ 
+ 	default:
+diff --git a/security/selinux/ss/avtab.c b/security/selinux/ss/avtab.c
+index 31345376aa9b..2f421a1afa71 100644
+--- a/security/selinux/ss/avtab.c
++++ b/security/selinux/ss/avtab.c
+@@ -555,6 +555,7 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
+ 		if (avtab_android_m_compat ||
+ 			    ((xperms.specified != AVTAB_XPERMS_IOCTLFUNCTION) &&
+ 			    (xperms.specified != AVTAB_XPERMS_IOCTLDRIVER) &&
++			    (xperms.specified != AVTAB_XPERMS_NLMSG) &&
+ 			    (vers == POLICYDB_VERSION_XPERMS_IOCTL))) {
+ 			xperms.driver = xperms.specified;
+ 			if (android_m_compat_optype)
+diff --git a/security/selinux/ss/avtab.h b/security/selinux/ss/avtab.h
+index d946c9dc3c9c..e72ab5dd6c7d 100644
+--- a/security/selinux/ss/avtab.h
++++ b/security/selinux/ss/avtab.h
+@@ -58,6 +58,7 @@ struct avtab_extended_perms {
+ /* These are not flags. All 256 values may be used */
+ #define AVTAB_XPERMS_IOCTLFUNCTION	0x01
+ #define AVTAB_XPERMS_IOCTLDRIVER	0x02
++#define AVTAB_XPERMS_NLMSG		0x03
+ 	/* extension of the avtab_key specified */
+ 	u8 specified; /* ioctl, netfilter, ... */
+ 	/*

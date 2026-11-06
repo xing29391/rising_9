@@ -1,0 +1,40 @@
+genfscon sysfs /devices/virtual/input/input4/chip_pow    u:object_r:sysfs_camera:s0
+
+genfscon sysfs /devices/platform/soc/soc:fpc1145		u:object_r:sysfs_fingerprint:s0
+
+genfscon sysfs /devices/platform/soc/soc:ldo_vibrator/leds/vibrator/activate    u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/soc/soc:ldo_vibrator/leds/vibrator/duration    u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/soc/soc:ldo_vibrator/leds/vibrator/state       u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/soc/soc:ldo_vibrator/leds/vibrator/trigger     u:object_r:sysfs_leds:s0
+
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-03/c440000.qcom,spmi:qcom,pmi8998@3:qcom,leds@d000    u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-03/c440000.qcom,spmi:qcom,pmi8998@3:qcom,leds@d300    u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-03/c440000.qcom,spmi:qcom,pmi8998@3:qcom,leds@d800    u:object_r:sysfs_leds:s0
+
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_aux_condition u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_aux_thresh_hot u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_aux_thresh_warm u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_batt_condition u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_debug_log_interval u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_wireless_condition u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_wlc_thresh_hot u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2/jeita_wlc_thresh_warm u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pmi8998@2:qpnp,fg/battery_soc u:object_r:sysfs_batteryinfo:s0
+
+genfscon sysfs /devices/virtual/switch/lid/state                u:object_r:sysfs_switch_lid:s0
+
+genfscon proc /sys/kernel/sched_autogroup_enabled               u:object_r:proc_sched:s0
+genfscon debugfs /sched_features                                u:object_r:debugfs_sched_features:s0
+genfscon proc /sys/kernel/sched_boost                           u:object_r:proc_sched:s0
+genfscon debugfs /wlan0                                         u:object_r:debugfs_wlan:s0
+genfscon sysfs /devices/platform/soc/ae00000.qcom,mdss_mdp/idle_state          u:object_r:vendor_sysfs_graphics:s0
+
+# SSR
+genfscon sysfs /devices/platform/soc/188101c.qcom,spss/subsys0/restart_level   u:object_r:vendor_sysfs_ssr_toggle:s0
+genfscon sysfs /devices/platform/soc/aae0000.qcom,venus/subsys1/restart_level  u:object_r:vendor_sysfs_ssr_toggle:s0
+genfscon sysfs /devices/platform/soc/soc:qcom,ipa_fws/subsys2/restart_level    u:object_r:vendor_sysfs_ssr_toggle:s0
+genfscon sysfs /devices/platform/soc/soc:qcom,kgsl-hyp/subsys3/restart_level   u:object_r:vendor_sysfs_ssr_toggle:s0
+genfscon sysfs /devices/platform/soc/17300000.qcom,lpass/subsys4/restart_level u:object_r:vendor_sysfs_ssr_toggle:s0
+genfscon sysfs /devices/platform/soc/5c00000.qcom,ssc/subsys5/restart_level    u:object_r:vendor_sysfs_ssr_toggle:s0
+genfscon sysfs /devices/platform/soc/8300000.qcom,turing/subsys6/restart_level u:object_r:vendor_sysfs_ssr_toggle:s0
+genfscon sysfs /devices/platform/soc/4080000.qcom,mss/subsys7/restart_level    u:object_r:vendor_sysfs_ssr_toggle:s0

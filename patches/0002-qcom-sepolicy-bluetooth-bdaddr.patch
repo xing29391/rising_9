@@ -1,0 +1,14 @@
+--- a/legacy-um/generic/vendor/common/hal_bluetooth_default.te
++++ b/legacy-um/generic/vendor/common/hal_bluetooth_default.te
+@@ -38,6 +38,11 @@
+ 
+ allow hal_bluetooth_default vendor_persist_bluetooth_file:dir rw_dir_perms;
+ allow hal_bluetooth_default vendor_persist_bluetooth_file:file create_file_perms;
++
++# Sony keeps the factory controller MAC in /data/vendor/etc/bluetooth_bdaddr
++# (written by taimport_vendor). Without read access the HAL falls back to a
++# generated address instead of the real one.
++allow hal_bluetooth_default bluetooth_vendor_data_file:file r_file_perms;
+ #For QMI socket
+ allow hal_bluetooth_default self:{ qipcrtr_socket } create_socket_perms_no_ioctl;
+ 

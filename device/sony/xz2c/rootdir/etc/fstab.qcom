@@ -1,0 +1,5 @@
+# First-stage fstab for skip_initramfs (system-as-root) boot.
+# Android 17 fs_mgr no longer reads the device-tree fstab, so first-stage init
+# needs a real file on /system. This device has no androidboot.boot_devices, so
+# /dev/block/by-name/* does not exist this early; use the platform path.
+/dev/block/platform/soc/1d84000.ufshc/by-name/vendor /vendor ext4 ro,barrier=1,discard wait,slotselect,first_stage_mount

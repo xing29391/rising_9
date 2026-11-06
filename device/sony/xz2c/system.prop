@@ -1,0 +1,22 @@
+# Camera
+camera.disable_zsl_mode=1
+
+# SEMC
+ro.semc.ms_type_id=PM-1130-BV
+ro.semc.product.device=H83
+ro.semc.product.model=H8324
+ro.semc.product.name=Xperia XZ2 Compact
+ro.semc.version.fs=GENERIC
+ro.semc.version.fs_revision=52.1.A.3.49
+ro.semc.version.sw=1311-5320
+ro.semc.version.sw_revision=52.1.A.3.49
+ro.semc.version.sw_type=user
+ro.semc.version.sw_variant=GLOBAL-A2
+
+# Keep logcat across reboots for bring-up debugging
+persist.logd.logpersistd=logcatd
+persist.logd.logpersistd.buffer=all
+persist.logd.logpersistd.size=16
+
+# Keep adb available regardless of system_server state
+persist.sys.usb.config=adb,mtp
