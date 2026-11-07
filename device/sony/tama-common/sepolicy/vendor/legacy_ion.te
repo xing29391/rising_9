@@ -16,3 +16,9 @@ allow vendor_hal_drm_widevine ion_device:chr_file r_file_perms;
 
 # Gatekeeper/keymaster open /dev/ion before QSEECom; without it they SIGABRT.
 allow { vendor_hal_gatekeeper_qti vendor_hal_keymaster_qti tee } ion_device:chr_file { r_file_perms ioctl };
+
+# Hardware OMX video encoder (media.codec, vendor type) opens /dev/ion both
+# directly (OMX-VENC) and through the in-process qdgralloc mapper. Without
+# this the singleton IonAlloc::Init() fails with EACCES, caches fd=-1, and
+# every ION_IOC_IMPORT returns EBADF, so recording produces no keyframes.
+allow mediacodec ion_device:chr_file { rw_file_perms ioctl };

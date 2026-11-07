@@ -7,6 +7,10 @@ allow { appdomain -isolated_app } ion_device:chr_file r_file_perms;
 # MediaCodec software codec (mediaswcodec) allocates legacy ION buffers.
 allow mediaswcodec ion_device:chr_file r_file_perms;
 
+# mediaserver's CodecLooper issues ION ioctls on /dev/ion during playback
+# and recording; without ioctl the encoder path fails under enforcing.
+allow mediaserver ion_device:chr_file rw_file_perms;
+
 # Bootanimation creates its EGL surface through the in-process legacy gralloc
 # mapper. Denying /dev/ion leaves the surface without buffers, eglSwapBuffers
 # fails with EGL_BAD_SURFACE and the panel shows a white screen instead of the

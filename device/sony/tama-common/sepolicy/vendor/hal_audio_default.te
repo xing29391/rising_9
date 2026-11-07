@@ -1,1 +1,5 @@
 allow hal_audio_default audio_hweffect_device:chr_file rw_file_perms;
+
+# ACDB loader allocates DSP shared memory via /dev/ion; without this the
+# voice-call TX/RX calibration fails (uplink silent, downlink noise).
+allow hal_audio_default ion_device:chr_file rw_file_perms;
